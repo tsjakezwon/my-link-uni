@@ -13,79 +13,17 @@
             --card-border: rgba(0, 0, 0, 0.08);
             --card-shadow: rgba(0, 0, 0, 0.05);
         }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 5vh 20px;
-        }
-
-        .container {
-            max-width: 980px;
-            margin: 0 auto;
-        }
-
-        .header {
-            margin-bottom: 40px;
-            position: relative;
-        }
-
-        #back-button {
-            position: absolute;
-            top: 5px;
-            left: 0;
-            font-size: 18px;
-            font-weight: 500;
-            color: #007aff;
-            cursor: pointer;
-            display: none; 
-        }
-        
-        .header h1 {
-            font-size: 48px;
-            font-weight: 600;
-            margin: 0;
-            text-align: center;
-        }
-
-        .selection-grid, .link-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 20px;
-        }
-
-        .selection-card, .link-card {
-            background-color: var(--card-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--card-border);
-            border-radius: 18px;
-            box-shadow: 0 5px 15px var(--card-shadow);
-            text-decoration: none;
-            color: var(--text-color);
-            padding: 25px;
-            text-align: center;
-            font-weight: 500;
-            font-size: 17px;
-            transition: transform 0.2s cubic-bezier(0.1, 0.7, 0.5, 1);
-            cursor: pointer;
-        }
-        
-        .selection-card:hover, .link-card:hover {
-            transform: scale(1.03);
-        }
-        
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 5vh 20px; }
+        .container { max-width: 980px; margin: 0 auto; }
+        .header { margin-bottom: 40px; position: relative; }
+        #back-button { position: absolute; top: 5px; left: 0; font-size: 18px; font-weight: 500; color: #007aff; cursor: pointer; display: none; }
+        .header h1 { font-size: 48px; font-weight: 600; margin: 0; text-align: center; }
+        .selection-grid, .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+        .selection-card, .link-card { background-color: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--card-border); border-radius: 18px; box-shadow: 0 5px 15px var(--card-shadow); text-decoration: none; color: var(--text-color); padding: 25px; text-align: center; font-weight: 500; font-size: 17px; transition: transform 0.2s cubic-bezier(0.1, 0.7, 0.5, 1); cursor: pointer; }
+        .selection-card:hover, .link-card:hover { transform: scale(1.03); }
         .view { display: none; }
         .view.active { display: block; }
-        
-        .loading {
-             text-align:center;
-             color: var(--text-color-secondary);
-             font-size: 18px;
-             margin-top: 50px;
-        }
+        .loading { text-align:center; color: var(--text-color-secondary); font-size: 18px; margin-top: 50px; }
     </style>
 </head>
 <body>
@@ -94,7 +32,6 @@
             <div id="back-button">‹ 뒤로</div>
             <h1 id="title">학기 선택</h1>
         </header>
-
         <main>
             <div id="semesters-view" class="view active">
                 <div id="semester-grid" class="selection-grid"></div>
@@ -108,14 +45,24 @@
             <div id="links-view" class="view">
                 <div id="link-grid" class="link-grid"></div>
             </div>
-            <p id="loading-message" class="loading">데이터를 불러오는 중...</p>
+            <p id="loading-message" class="loading" style="display: none;">데이터를 불러오는 중...</p>
         </main>
     </div>
 
     <script>
-        const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSr9BhaorHsJ0DnXCXQL_qeyARh2fWlfOZcLTcbTkxeAxb-1zOogzzP_hAr5uCjLl2g5HhHbDhxQsdB/pub?output=csv';
+        // ✅ 사용자님의 학기별 CSV 링크를 모두 반영했습니다!
+        const semesterLinks = {
+            '1-1': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSr9BhaorHsJ0DnXCXQL_qeyARh2fWlfOZcLTcbTkxeAxb-1zOogzzP_hAr5uCjLl2g5HhHbDhxQsdB/pub?gid=0&single=true&output=csv',
+            '1-2': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSr9BhaorHsJ0DnXCXQL_qeyARh2fWlfOZcLTcbTkxeAxb-1zOogzzP_hAr5uCjLl2g5HhHbDhxQsdB/pub?gid=515622066&single=true&output=csv',
+            '2-1': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSr9BhaorHsJ0DnXCXQL_qeyARh2fWlfOZcLTcbTkxeAxb-1zOogzzP_hAr5uCjLl2g5HhHbDhxQsdB/pub?gid=10328622&single=true&output=csv',
+            '2-2': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSr9BhaorHsJ0DnXCXQL_qeyARh2fWlfOZcLTcbTkxeAxb-1zOogzzP_hAr5uCjLl2g5HhHbDhxQsdB/pub?gid=1151834881&single=true&output=csv',
+            '3-1': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSr9BhaorHsJ0DnXCXQL_qeyARh2fWlfOZcLTcbTkxeAxb-1zOogzzP_hAr5uCjLl2g5HhHbDhxQsdB/pub?gid=2133898658&single=true&output=csv',
+            '3-2': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSr9BhaorHsJ0DnXCXQL_qeyARh2fWlfOZcLTcbTkxeAxb-1zOogzzP_hAr5uCjLl2g5HhHbDhxQsdB/pub?gid=1569537376&single=true&output=csv',
+            '4-1': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSr9BhaorHsJ0DnXCXQL_qeyARh2fWlfOZcLTcbTkxeAxb-1zOogzzP_hAr5uCjLl2g5HhHbDhxQsdB/pub?gid=949611269&single=true&output=csv',
+            '4-2': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSr9BhaorHsJ0DnXCXQL_qeyARh2fWlfOZcLTcbTkxeAxb-1zOogzzP_hAr5uCjLl2g5HhHbDhxQsdB/pub?gid=2015286910&single=true&output=csv'
+        };
 
-        let allData = {};
+        let currentSemesterData = [];
         const state = {
             level: 0,
             semester: null,
@@ -131,6 +78,7 @@
         function updateView() {
             views.forEach(view => view.classList.remove('active'));
             backButton.style.display = 'none';
+            loadingMessage.style.display = 'none';
 
             if (state.level === 0) {
                 document.getElementById('semesters-view').classList.add('active');
@@ -170,17 +118,18 @@
         function showSemesters() {
             const grid = document.getElementById('semester-grid');
             grid.innerHTML = '';
-            Object.keys(allData).sort().forEach(semester => {
-                grid.appendChild(createCard(semester, 'selection', (selected) => {
+            Object.keys(semesterLinks).sort().forEach(semester => {
+                grid.appendChild(createCard(semester, 'selection', async (selected) => {
                     state.level = 1;
                     state.semester = selected;
+                    await fetchSemesterData(selected);
                     updateView();
                 }));
             });
         }
 
         function showDays() {
-            const uniqueDays = [...new Set(allData[state.semester].map(row => row.day))];
+            const uniqueDays = [...new Set(currentSemesterData.map(row => row.day))];
             const grid = document.getElementById('day-grid');
             grid.innerHTML = '';
             uniqueDays.forEach(day => {
@@ -193,7 +142,7 @@
         }
 
         function showCourses() {
-            const filteredData = allData[state.semester].filter(row => row.day === state.day);
+            const filteredData = currentSemesterData.filter(row => row.day === state.day);
             const uniqueCourses = [...new Set(filteredData.map(row => row.course))];
             const grid = document.getElementById('course-grid');
             grid.innerHTML = '';
@@ -207,7 +156,7 @@
         }
         
         function showLinks() {
-            const filteredData = allData[state.semester].filter(row => row.day === state.day && row.course === state.course);
+            const filteredData = currentSemesterData.filter(row => row.day === state.day && row.course === state.course);
             const grid = document.getElementById('link-grid');
             grid.innerHTML = '';
             filteredData.forEach(row => {
@@ -217,54 +166,45 @@
 
         backButton.addEventListener('click', () => {
             if (state.level > 0) state.level--;
+            if (state.level === 0) currentSemesterData = [];
             updateView();
         });
 
-        async function parseData() {
+        async function fetchSemesterData(semester) {
+            const url = semesterLinks[semester];
+            if (!url || url.includes('여기에')) {
+                alert('이 학기의 CSV 링크가 코드에 설정되지 않았습니다.');
+                return;
+            }
+
+            loadingMessage.style.display = 'block';
+            views.forEach(view => view.classList.remove('active'));
+
             try {
-                const response = await fetch(csvUrl);
+                const response = await fetch(url);
                 const data = await response.text();
-                const lines = data.trim().split(/\r\n|\n|\r/); // 모든 종류의 줄바꿈 처리
+                const rows = data.trim().split('\n').slice(1);
                 
-                let currentSheetName = '';
-                
-                lines.forEach(line => {
-                    const trimmedLine = line.trim();
-                    if (!trimmedLine) return; // 빈 줄 건너뛰기
-
-                    const columns = trimmedLine.split(',');
-
-                    // ✅ 더 똑똑한 로직: 쉼표가 없고, 내용이 있는 줄을 시트 이름으로 간주
-                    if (columns.length === 1 && columns[0] !== "") {
-                        currentSheetName = columns[0];
-                        allData[currentSheetName] = [];
-                    } 
-                    // ✅ 더 똑똑한 로직: 열이 4개 이상이고, 현재 시트 이름이 있으며, 첫 열이 'day'가 아닌 경우 데이터로 간주
-                    else if (columns.length >= 4 && currentSheetName && columns[0].toLowerCase() !== 'day') {
-                        allData[currentSheetName].push({
-                            day: columns[0].trim(),
-                            course: columns[1].trim(),
-                            link_name: columns[2].trim(),
-                            url: columns[3].trim()
-                        });
-                    }
-                });
-
-                // 데이터가 하나도 없는 경우를 위한 처리
-                if(Object.keys(allData).length === 0) {
-                     loadingMessage.textContent = '처리할 데이터가 없습니다. 시트 내용과 형식을 확인해주세요.';
-                } else {
-                     loadingMessage.style.display = 'none';
-                     updateView();
-                }
+                currentSemesterData = rows.map(row => {
+                    const columns = row.split(',');
+                    if (columns.length < 4) return null;
+                    return {
+                        day: columns[0].trim(),
+                        course: columns[1].trim(),
+                        link_name: columns[2].trim(),
+                        url: columns[3].trim()
+                    };
+                }).filter(Boolean);
 
             } catch (error) {
-                loadingMessage.textContent = '데이터를 불러오는 데 실패했습니다. CSV 링크와 시트 공유 설정을 확인해주세요.';
-                console.error('Error:', error);
+                console.error('Error fetching semester data:', error);
+                alert(`${semester} 학기 데이터를 불러오는 데 실패했습니다.`);
+                state.level = 0;
             }
         }
         
-        parseData();
+        // 초기 화면 표시
+        updateView();
     </script>
 </body>
 </html>
