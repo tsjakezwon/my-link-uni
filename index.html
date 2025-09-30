@@ -40,9 +40,9 @@
             font-weight: 500;
             color: #007aff;
             cursor: pointer;
-            display: none;
+            display: none; 
         }
-
+        
         .header h1 {
             font-size: 48px;
             font-weight: 600;
@@ -72,14 +72,14 @@
             transition: transform 0.2s cubic-bezier(0.1, 0.7, 0.5, 1);
             cursor: pointer;
         }
-
+        
         .selection-card:hover, .link-card:hover {
             transform: scale(1.03);
         }
-
+        
         .view { display: none; }
         .view.active { display: block; }
-
+        
         .loading {
              text-align:center;
              color: var(--text-color-secondary);
@@ -113,8 +113,8 @@
     </div>
 
     <script>
-        // ✅ 사용자님의 진짜 ID를 여기에 넣어두었습니다!
-        const SPREADSHEET_ID = '1hAcdWwJHc5FRg2qdR56ONXgBcXt67bHHAvaB9juXaU4';
+        // ✅ 사용자님의 CSV 링크를 여기에 반영했습니다!
+        const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSr9BhaorHsJ0DnXCXQL_qeyARh2fWlfOZcLTcbTkxeAxb-1zOogzzP_hAr5uCjLl2g5HhHbDhxQsdB/pub?output=csv';
 
         let allData = {};
         const state = {
@@ -123,7 +123,7 @@
             day: null,
             course: null,
         };
-
+        
         const titleEl = document.getElementById('title');
         const backButton = document.getElementById('back-button');
         const views = document.querySelectorAll('.view');
@@ -167,7 +167,7 @@
             }
             return card;
         }
-
+        
         function showSemesters() {
             const grid = document.getElementById('semester-grid');
             grid.innerHTML = '';
@@ -206,7 +206,7 @@
                 }));
             });
         }
-
+        
         function showLinks() {
             const filteredData = allData[state.semester].filter(row => row.day === state.day && row.course === state.course);
             const grid = document.getElementById('link-grid');
@@ -221,52 +221,46 @@
             updateView();
         });
 
-        async function fetchAllSheets() {
+        async function parseData() {
             try {
-                const sheetNamesUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json`;
-                const response = await fetch(sheetNamesUrl);
-                const text = await response.text();
-                const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\((.*)\)/s)[1]);
+                const response = await fetch(csvUrl);
+                const data = await response.text();
+                const lines = data.trim().split('\n');
+                
+                let currentSheetName = '';
+                
+                lines.forEach(line => {
+                    const columns = line.split(',');
+                    if (columns.length === 1 && columns[0].trim() !== '') {
+                        currentSheetName = columns[0].trim();
+                        // 시트 이름에 (day) 같은 불필요한 텍스트가 포함된 경우 제거
+                        if (currentSheetName.includes('(')) {
+                            return; 
+                        }
+                        allData[currentSheetName] = [];
+                    } 
+                    else if (columns.length >= 4 && currentSheetName) {
+                        if(columns[0].trim().toLowerCase() === 'day' || columns[0].trim().toLowerCase() === 'a (day)') return;
 
-                const sheetNames = json.table.rows.map(row => row.c[0].v).filter(Boolean);
-
-                const sheetPromises = sheetNames.map(async (sheetName) => {
-                    const csvUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
-                    const csvResponse = await fetch(csvUrl);
-                    let csvText = await csvResponse.text();
-
-                    let rows = csvText.trim().split('\n').slice(1);
-                    let parsedData = rows.map(row => {
-                        let columns = row.slice(1, -1).split('","');
-                        if (columns.length < 4) return null;
-                        return {
+                        allData[currentSheetName].push({
                             day: columns[0].trim(),
                             course: columns[1].trim(),
                             link_name: columns[2].trim(),
                             url: columns[3].trim()
-                        };
-                    }).filter(Boolean);
-                    
-                    allData[sheetName] = parsedData;
+                        });
+                    }
                 });
-
-                await Promise.all(sheetPromises);
-                
-                if (Object.keys(allData).length === 0) {
-                     loadingMessage.textContent = '시트를 찾을 수 없습니다. 시트 이름이 있는지, 공유 설정이 올바른지 확인해주세요.';
-                     return;
-                }
 
                 loadingMessage.style.display = 'none';
                 updateView();
 
             } catch (error) {
-                loadingMessage.textContent = '데이터를 불러오는 데 실패했습니다. ID와 공유 설정을 다시 확인해주세요.';
+                loadingMessage.textContent = '데이터를 불러오는 데 실패했습니다. CSV 링크와 시트 형식을 확인해주세요.';
                 console.error('Error:', error);
             }
         }
         
-        fetchAllSheets();
+        parseData();
     </script>
 </body>
 </html>
