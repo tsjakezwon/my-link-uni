@@ -113,7 +113,6 @@
     </div>
 
     <script>
-        // ✅ 사용자님의 CSV 링크를 여기에 반영했습니다!
         const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSr9BhaorHsJ0DnXCXQL_qeyARh2fWlfOZcLTcbTkxeAxb-1zOogzzP_hAr5uCjLl2g5HhHbDhxQsdB/pub?output=csv';
 
         let allData = {};
@@ -225,23 +224,23 @@
             try {
                 const response = await fetch(csvUrl);
                 const data = await response.text();
-                const lines = data.trim().split('\n');
+                const lines = data.trim().split(/\r\n|\n|\r/); // 모든 종류의 줄바꿈 처리
                 
                 let currentSheetName = '';
                 
                 lines.forEach(line => {
-                    const columns = line.split(',');
-                    if (columns.length === 1 && columns[0].trim() !== '') {
-                        currentSheetName = columns[0].trim();
-                        // 시트 이름에 (day) 같은 불필요한 텍스트가 포함된 경우 제거
-                        if (currentSheetName.includes('(')) {
-                            return; 
-                        }
+                    const trimmedLine = line.trim();
+                    if (!trimmedLine) return; // 빈 줄 건너뛰기
+
+                    const columns = trimmedLine.split(',');
+
+                    // ✅ 더 똑똑한 로직: 쉼표가 없고, 내용이 있는 줄을 시트 이름으로 간주
+                    if (columns.length === 1 && columns[0] !== "") {
+                        currentSheetName = columns[0];
                         allData[currentSheetName] = [];
                     } 
-                    else if (columns.length >= 4 && currentSheetName) {
-                        if(columns[0].trim().toLowerCase() === 'day' || columns[0].trim().toLowerCase() === 'a (day)') return;
-
+                    // ✅ 더 똑똑한 로직: 열이 4개 이상이고, 현재 시트 이름이 있으며, 첫 열이 'day'가 아닌 경우 데이터로 간주
+                    else if (columns.length >= 4 && currentSheetName && columns[0].toLowerCase() !== 'day') {
                         allData[currentSheetName].push({
                             day: columns[0].trim(),
                             course: columns[1].trim(),
@@ -251,11 +250,16 @@
                     }
                 });
 
-                loadingMessage.style.display = 'none';
-                updateView();
+                // 데이터가 하나도 없는 경우를 위한 처리
+                if(Object.keys(allData).length === 0) {
+                     loadingMessage.textContent = '처리할 데이터가 없습니다. 시트 내용과 형식을 확인해주세요.';
+                } else {
+                     loadingMessage.style.display = 'none';
+                     updateView();
+                }
 
             } catch (error) {
-                loadingMessage.textContent = '데이터를 불러오는 데 실패했습니다. CSV 링크와 시트 형식을 확인해주세요.';
+                loadingMessage.textContent = '데이터를 불러오는 데 실패했습니다. CSV 링크와 시트 공유 설정을 확인해주세요.';
                 console.error('Error:', error);
             }
         }
