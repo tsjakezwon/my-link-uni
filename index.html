@@ -6,99 +6,24 @@
     <title>Academic Portal</title>
     <style>
         :root {
-            --bg-color: #f0f0f5; /* macOS의 연한 배경색 */
+            --bg-color: #f0f0f5;
             --text-color: #000000;
             --text-color-secondary: #6e6e73;
-            --card-bg: #ffffff; /* 목록 항목 배경색 */
+            --card-bg: #ffffff;
             --border-color: #dcdcdc;
         }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 5vh 20px;
-            display: flex;
-            justify-content: center;
-        }
-
-        .container {
-            max-width: 720px; /* 설정 창과 유사한 폭 */
-            width: 100%;
-        }
-
-        .header {
-            margin-bottom: 30px;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center; /* 제목 중앙 정렬 */
-        }
-
-        #back-button {
-            position: absolute;
-            left: 0;
-            font-size: 17px;
-            color: #007aff;
-            cursor: pointer;
-            display: none;
-            padding: 10px;
-        }
-        
-        .header h1 {
-            font-size: 32px; /* 제목 크기 조정 */
-            font-weight: 600;
-            margin: 0;
-        }
-
-        /* 그리드 대신 목록 형태로 변경 */
-        .selection-list, .link-list {
-            display: flex;
-            flex-direction: column;
-            gap: 2px; /* 항목 사이의 얇은 선 */
-            background-color: var(--border-color);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            overflow: hidden; /* 둥근 모서리를 위해 */
-        }
-
-        /* macOS 설정 스타일의 목록 항목 */
-        .selection-item, .link-item {
-            background-color: var(--card-bg);
-            text-decoration: none;
-            color: var(--text-color);
-            padding: 12px 20px;
-            font-weight: 400;
-            font-size: 17px;
-            transition: background-color 0.2s ease;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: space-between; /* 텍스트와 화살표를 양 끝으로 */
-        }
-
-        .selection-item:hover, .link-item:hover {
-            background-color: #e8e8ed;
-        }
-
-        /* 선택 항목(학기, 요일 등)에만 오른쪽 화살표 추가 */
-        .selection-item::after {
-            content: '›';
-            font-size: 24px;
-            color: var(--text-color-secondary);
-            font-weight: 300;
-        }
-        
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 5vh 20px; display: flex; justify-content: center; }
+        .container { max-width: 720px; width: 100%; }
+        .header { margin-bottom: 30px; position: relative; display: flex; align-items: center; justify-content: center; }
+        #back-button { position: absolute; left: 0; font-size: 17px; color: #007aff; cursor: pointer; display: none; padding: 10px; }
+        .header h1 { font-size: 32px; font-weight: 600; margin: 0; }
+        .selection-list, .link-list { display: flex; flex-direction: column; gap: 2px; background-color: var(--border-color); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; }
+        .selection-item, .link-item { background-color: var(--card-bg); text-decoration: none; color: var(--text-color); padding: 12px 20px; font-weight: 400; font-size: 17px; transition: background-color 0.2s ease; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
+        .selection-item:hover, .link-item:hover { background-color: #e8e8ed; }
+        .selection-item::after { content: '›'; font-size: 24px; color: var(--text-color-secondary); font-weight: 300; }
         .view { display: none; }
         .view.active { display: block; }
-        
-        .loading {
-             text-align:center;
-             color: var(--text-color-secondary);
-             font-size: 18px;
-             margin-top: 50px;
-        }
+        .loading { text-align:center; color: var(--text-color-secondary); font-size: 18px; margin-top: 50px; }
     </style>
 </head>
 <body>
@@ -125,12 +50,16 @@
     </div>
 
     <script>
-        // ✅ 여기에 본인의 학기별 CSV 링크 목록을 정확히 넣어주세요.
+        // ✅ 8개 학기 링크를 모두 반영했습니다!
         const semesterLinks = {
             '1-1': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSr9BhaorHsJ0DnXCXQL_qeyARh2fWlfOZcLTcbTkxeAxb-1zOogzzP_hAr5uCjLl2g5HhHbDhxQsdB/pub?gid=0&single=true&output=csv',
             '1-2': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSr9BhaorHsJ0DnXCXQL_qeyARh2fWlfOZcLTcbTkxeAxb-1zOogzzP_hAr5uCjLl2g5HhHbDhxQsdB/pub?gid=515622066&single=true&output=csv',
             '2-1': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSr9BhaorHsJ0DnXCXQL_qeyARh2fWlfOZcLTcbTkxeAxb-1zOogzzP_hAr5uCjLl2g5HhHbDhxQsdB/pub?gid=10328622&single=true&output=csv',
-            // ... 나머지 학기 링크들
+            '2-2': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSr9BhaorHsJ0DnXCXQL_qeyARh2fWlfOZcLTcbTkxeAxb-1zOogzzP_hAr5uCjLl2g5HhHbDhxQsdB/pub?gid=1151834881&single=true&output=csv',
+            '3-1': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSr9BhaorHsJ0DnXCXQL_qeyARh2fWlfOZcLTcbTkxeAxb-1zOogzzP_hAr5uCjLl2g5HhHbDhxQsdB/pub?gid=2133898658&single=true&output=csv',
+            '3-2': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSr9BhaorHsJ0DnXCXQL_qeyARh2fWlfOZcLTcbTkxeAxb-1zOogzzP_hAr5uCjLl2g5HhHbDhxQsdB/pub?gid=1569537376&single=true&output=csv',
+            '4-1': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSr9BhaorHsJ0DnXCXQL_qeyARh2fWlfOZcLTcbTkxeAxb-1zOogzzP_hAr5uCjLl2g5HhHbDhxQsdB/pub?gid=949611269&single=true&output=csv',
+            '4-2': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSr9BhaorHsJ0DnXCXQL_qeyARh2fWlfOZcLTcbTkxeAxb-1zOogzzP_hAr5uCjLl2g5HhHbDhxQsdB/pub?gid=2015286910&single=true&output=csv'
         };
 
         let currentSemesterData = [];
@@ -240,7 +169,7 @@
 
         async function fetchSemesterData(semester) {
             const url = semesterLinks[semester];
-            if (!url || url.includes('여기에')) {
+            if (!url || !url.startsWith('http')) {
                 alert('이 학기의 CSV 링크가 코드에 설정되지 않았습니다.');
                 return;
             }
